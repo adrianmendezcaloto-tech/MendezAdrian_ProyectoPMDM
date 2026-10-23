@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,15 +9,20 @@ public class MovimientoJugador : MonoBehaviour
     InputAction saltar;
     Rigidbody2D rb2d;
     CapsuleCollider2D collider2d;
+
     [SerializeField] private LayerMask jumpableGround;
+    [SerializeField] private LayerMask wallLayer;
 
     Vector2 valorMovimiento;
 
     float velocidad = 5f;
     float fuerzaSalto = 7f;
-    int saltosRestantes = 1;
+    int saltosRestantes = 2;
     int estado = 0;
+
     bool estabaEnSuelo = false;
+    bool wallJumping = false;
+
     void Start()
     {
         movimiento = InputSystem.actions.FindAction("Move");
@@ -24,45 +30,46 @@ public class MovimientoJugador : MonoBehaviour
 
         rb2d = GetComponent<Rigidbody2D>();
         collider2d = GetComponent<CapsuleCollider2D>();
-
         animator = GetComponent<Animator>();
     }
 
-    void Update()
+   
+void Update()
+{
+    valorMovimiento = movimiento.ReadValue<Vector2>();
+
+    rb2d.linearVelocityX = valorMovimiento.x * velocidad;
+
+    GirarJugador();
+
+    bool tocaSuelo = TocaSuelo()
+        && rb2d.linearVelocityY <= 0;
+
+    int direccionPared = DireccionPared();
+
+    if (tocaSuelo)
     {
-        valorMovimiento = movimiento.ReadValue<Vector2>();
-        rb2d.linearVelocityX = valorMovimiento.x * velocidad;
+        saltosRestantes = 2;
+        wallJumping = false;
+        CambiarAnimacion();
+    }
 
-        GirarJugador();
+    estabaEnSuelo = tocaSuelo;
 
-        bool tocaSuelo = TocaSuelo() && rb2d.linearVelocityY <= 0;
-
-        if (tocaSuelo && !estabaEnSuelo)
+    if (saltar.WasPressedThisFrame())
+    {
+        if (direccionPared != 0 && !tocaSuelo)
         {
-            saltosRestantes = 2;
-            CambiarAnimacion();
+            SaltoPared(direccionPared);
         }
-
-        estabaEnSuelo = tocaSuelo;
-
-        if (saltar.WasPressedThisFrame() && saltosRestantes > 0)
+        else if (saltosRestantes > 0)
         {
-            saltosRestantes--;
-            rb2d.linearVelocityY = fuerzaSalto;
-            estabaEnSuelo = false;
-
-            if (saltosRestantes == 1)
-            {
-                estado = 2;
-            }
-            else
-            {
-                estado = 3;
-            }
-
-            animator.SetInteger("estado", estado);
+            SaltoNormal();
         }
     }
+}
+
+
     private bool TocaSuelo()
     {
         return Physics2D.BoxCast(
@@ -75,17 +82,46 @@ public class MovimientoJugador : MonoBehaviour
         );
     }
 
-    void GirarJugador()
+    private int DireccionPared()
     {
-        if (valorMovimiento.x < 0)
+        if (Physics2D.BoxCast(
+            collider2d.bounds.center,
+            collider2d.bounds.size,
+            0f,
+            Vector2.left,
+            .1f,
+            wallLayer))
         {
-            transform.localScale = new Vector3(-1, 1, 1);
+            return -1;
         }
-        else if (valorMovimiento.x > 0)
+
+        if (Physics2D.BoxCast(
+            collider2d.bounds.center,
+            collider2d.bounds.size,
+            0f,
+            Vector2.right,
+            .1f,
+            wallLayer))
         {
-            transform.localScale = new Vector3(1, 1, 1);
+            return 1;
         }
+
+        return 0;
     }
+
+    
+void GirarJugador()
+{
+    if (valorMovimiento.x < 0)
+    {
+        transform.localScale = new Vector3(-1, 1, 1);
+    }
+    else if (valorMovimiento.x > 0)
+    {
+        transform.localScale = new Vector3(1, 1, 1);
+    }
+}
+
 
     void CambiarAnimacion()
     {
@@ -100,4 +136,49 @@ public class MovimientoJugador : MonoBehaviour
 
         animator.SetInteger("estado", estado);
     }
+
+    
+void SaltoPared(int direccionPared)
+{
+    rb2d.linearVelocity = new Vector2(
+        -direccionPared * velocidad,
+        fuerzaSalto
+    );
+
+    saltosRestantes = 0;
+
+    estado = 4;
+    animator.SetInteger("estado", estado);
+
+    if (direccionPared < 0)
+    {
+        transform.localScale = new Vector3(1, 1, 1);
+    }
+    else
+    {
+        transform.localScale = new Vector3(-1, 1, 1);
+    }
+
+    wallJumping = true;
+}
+
+    void SaltoNormal()
+    {
+        saltosRestantes--;
+
+        rb2d.linearVelocityY = fuerzaSalto;
+
+    if (saltosRestantes == 1)
+    {
+        estado = 2;
+    }
+    else
+    {
+        estado = 3;
+    }
+
+        animator.SetInteger("estado", estado);
+    }
+
+
 }
