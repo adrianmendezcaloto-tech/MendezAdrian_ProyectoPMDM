@@ -22,6 +22,7 @@ public class MovimientoJugador : MonoBehaviour
 
     bool estabaEnSuelo = false;
     bool wallJumping = false;
+    bool recibiendoDano = false;
 
     void Start()
     {
@@ -33,41 +34,45 @@ public class MovimientoJugador : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-   
-void Update()
-{
-    valorMovimiento = movimiento.ReadValue<Vector2>();
 
-    rb2d.linearVelocityX = valorMovimiento.x * velocidad;
-
-    GirarJugador();
-
-    bool tocaSuelo = TocaSuelo()
-        && rb2d.linearVelocityY <= 0;
-
-    int direccionPared = DireccionPared();
-
-    if (tocaSuelo)
+    void Update()
     {
-        saltosRestantes = 2;
-        wallJumping = false;
-        CambiarAnimacion();
-    }
+    
 
-    estabaEnSuelo = tocaSuelo;
+        valorMovimiento = movimiento.ReadValue<Vector2>();
 
-    if (saltar.WasPressedThisFrame())
-    {
-        if (direccionPared != 0 && !tocaSuelo)
+        valorMovimiento = movimiento.ReadValue<Vector2>();
+
+        rb2d.linearVelocityX = valorMovimiento.x * velocidad;
+
+        GirarJugador();
+
+        bool tocaSuelo = TocaSuelo()
+            && rb2d.linearVelocityY <= 0;
+
+        int direccionPared = DireccionPared();
+
+        if (tocaSuelo)
         {
-            SaltoPared(direccionPared);
+            saltosRestantes = 2;
+            wallJumping = false;
+            CambiarAnimacion();
         }
-        else if (saltosRestantes > 0)
+
+        estabaEnSuelo = tocaSuelo;
+
+        if (saltar.WasPressedThisFrame())
         {
-            SaltoNormal();
+            if (direccionPared != 0 && !tocaSuelo)
+            {
+                SaltoPared(direccionPared);
+            }
+            else if (saltosRestantes > 0)
+            {
+                SaltoNormal();
+            }
         }
     }
-}
 
 
     private bool TocaSuelo()
@@ -109,18 +114,18 @@ void Update()
         return 0;
     }
 
-    
-void GirarJugador()
-{
-    if (valorMovimiento.x < 0)
+
+    void GirarJugador()
     {
-        transform.localScale = new Vector3(-1, 1, 1);
+        if (valorMovimiento.x < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        else if (valorMovimiento.x > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
     }
-    else if (valorMovimiento.x > 0)
-    {
-        transform.localScale = new Vector3(1, 1, 1);
-    }
-}
 
 
     void CambiarAnimacion()
@@ -137,30 +142,30 @@ void GirarJugador()
         animator.SetInteger("estado", estado);
     }
 
-    
-void SaltoPared(int direccionPared)
-{
-    rb2d.linearVelocity = new Vector2(
-        -direccionPared * velocidad,
-        fuerzaSalto
-    );
 
-    saltosRestantes = 0;
-
-    estado = 4;
-    animator.SetInteger("estado", estado);
-
-    if (direccionPared < 0)
+    void SaltoPared(int direccionPared)
     {
-        transform.localScale = new Vector3(1, 1, 1);
-    }
-    else
-    {
-        transform.localScale = new Vector3(-1, 1, 1);
-    }
+        rb2d.linearVelocity = new Vector2(
+            -direccionPared * velocidad,
+            fuerzaSalto
+        );
 
-    wallJumping = true;
-}
+        saltosRestantes = 0;
+
+        estado = 4;
+        animator.SetInteger("estado", estado);
+
+        if (direccionPared < 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+
+        wallJumping = true;
+    }
 
     void SaltoNormal()
     {
@@ -168,17 +173,33 @@ void SaltoPared(int direccionPared)
 
         rb2d.linearVelocityY = fuerzaSalto;
 
-    if (saltosRestantes == 1)
-    {
-        estado = 2;
-    }
-    else
-    {
-        estado = 3;
-    }
+        if (saltosRestantes == 1)
+        {
+            estado = 2;
+        }
+        else
+        {
+            estado = 3;
+        }
 
         animator.SetInteger("estado", estado);
     }
+
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.name == "ObstaculoDanoTriangulo")
+        {
+            RecibirDano();
+        }
+    }
+    public void RecibirDano()
+    {
+        recibiendoDano = true;
+        estado = 5;
+        animator.SetInteger("estado", estado);
+    }
+  
 
 
 }
