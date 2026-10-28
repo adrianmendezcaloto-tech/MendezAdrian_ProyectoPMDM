@@ -37,7 +37,7 @@ public class MovimientoJugador : MonoBehaviour
 
     void Update()
     {
-    
+
 
         valorMovimiento = movimiento.ReadValue<Vector2>();
 
@@ -186,20 +186,51 @@ public class MovimientoJugador : MonoBehaviour
     }
 
 
-    private void OnTriggerEnter2D(Collider2D collision)
+
+    // ANIMACION DAÑO
+
+    public void TerminarDano()
     {
-        if (collision.gameObject.name == "ObstaculoDanoTriangulo")
+        recibiendoDano = false;
+
+        if (valorMovimiento.x != 0)
         {
-            RecibirDano();
+            estado = 1;
         }
-    }
-    public void RecibirDano()
-    {
-        recibiendoDano = true;
-        estado = 5;
+        else
+        {
+            estado = 0;
+        }
+
         animator.SetInteger("estado", estado);
     }
-  
+
+
+    // ANIMACION DAÑO
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Pinchos") && !recibiendoDano)
+        {
+            recibiendoDano = true;
+            estado = 5;
+            animator.SetInteger("estado", estado);
+        }
+    }
+
+
+    //SALIR DE LA ANIMACION DE DAÑO
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Pinchos"))
+        {
+            recibiendoDano = false;
+        }
+    }
+
 
 
 }
+
+
+
+
