@@ -187,7 +187,17 @@ public class MovimientoJugador : MonoBehaviour
 
 
 
+
     // ANIMACION DAÑO
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Pinchos") && !recibiendoDano)
+        {
+            recibiendoDano = true;
+            estado = 5;
+            animator.SetInteger("estado", estado);
+        }
+    }
 
     public void TerminarDano()
     {
@@ -205,20 +215,7 @@ public class MovimientoJugador : MonoBehaviour
         animator.SetInteger("estado", estado);
     }
 
-
-    // ANIMACION DAÑO
-    void OnCollisionStay2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Pinchos") && !recibiendoDano)
-        {
-            recibiendoDano = true;
-            estado = 5;
-            animator.SetInteger("estado", estado);
-        }
-    }
-
-
-    //SALIR DE LA ANIMACION DE DAÑO
+    // SALIR DE LA ANIMACION DE DAÑO
     void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Pinchos"))
@@ -226,11 +223,7 @@ public class MovimientoJugador : MonoBehaviour
             recibiendoDano = false;
         }
     }
-
-
-
 }
-
 
 
 
