@@ -21,7 +21,6 @@ public class MovimientoJugador : MonoBehaviour
     int estado = 0;
 
     bool estabaEnSuelo = false;
-    bool wallJumping = false;
     bool recibiendoDano = false;
 
     void Start()
@@ -55,7 +54,6 @@ public class MovimientoJugador : MonoBehaviour
         if (tocaSuelo)
         {
             saltosRestantes = 2;
-            wallJumping = false;
             CambiarAnimacion();
         }
 
@@ -164,7 +162,6 @@ public class MovimientoJugador : MonoBehaviour
             transform.localScale = new Vector3(-1, 1, 1);
         }
 
-        wallJumping = true;
     }
 
     void SaltoNormal()
@@ -188,10 +185,27 @@ public class MovimientoJugador : MonoBehaviour
 
 
 
+    
     // ANIMACION DAÑO
     void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Pinchos") && !recibiendoDano)
+        if (collision.gameObject.CompareTag("Obstaculos"))
+        {
+            RecibirDano();
+        }
+    }
+
+    void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Obstaculos"))
+        {
+            RecibirDano();
+        }
+    }
+
+    void RecibirDano()
+    {
+        if (!recibiendoDano)
         {
             recibiendoDano = true;
             estado = 5;
@@ -215,15 +229,27 @@ public class MovimientoJugador : MonoBehaviour
         animator.SetInteger("estado", estado);
     }
 
-    // SALIR DE LA ANIMACION DE DAÑO
+    // SALIR DE LOS OBSTACULOS
     void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Pinchos"))
+        if (collision.gameObject.CompareTag("Obstaculos"))
         {
             recibiendoDano = false;
         }
     }
+
+    void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Obstaculos"))
+        {
+            recibiendoDano = false;
+        }
+    }
+
+
 }
+
+
 
 
 
