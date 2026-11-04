@@ -1,5 +1,3 @@
-
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CheckPoint : MonoBehaviour
@@ -18,8 +16,12 @@ public class CheckPoint : MonoBehaviour
         {
             estado = 1;
             animator.SetInteger("estado", estado);
+
+            VidasPJ vidas = collision.GetComponent<VidasPJ>();
+            if (vidas != null)
+            {
+                vidas.GuardarCheckpoint(transform.position);
+            }
         }
     }
 }
-
-

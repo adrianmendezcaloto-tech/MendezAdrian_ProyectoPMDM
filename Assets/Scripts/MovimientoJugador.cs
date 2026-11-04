@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 
 public class MovimientoJugador : MonoBehaviour
 {
+    VidasPJ vidas;
     Animator animator;
     InputAction movimiento;
     InputAction saltar;
@@ -31,12 +32,19 @@ public class MovimientoJugador : MonoBehaviour
         rb2d = GetComponent<Rigidbody2D>();
         collider2d = GetComponent<CapsuleCollider2D>();
         animator = GetComponent<Animator>();
+        vidas = GetComponent<VidasPJ>();
     }
 
 
     void Update()
     {
+        if (vidas.muerto || vidas.reapareciendo) return;
 
+        if (vidas.enDano)
+        {
+            rb2d.linearVelocityX = 0;
+            return;
+        }
 
         valorMovimiento = movimiento.ReadValue<Vector2>();
 
@@ -50,6 +58,9 @@ public class MovimientoJugador : MonoBehaviour
             && rb2d.linearVelocityY <= 0;
 
         int direccionPared = DireccionPared();
+
+        if (vidas.muerto) return;
+        valorMovimiento = movimiento.ReadValue<Vector2>();
 
         if (tocaSuelo)
         {
@@ -185,7 +196,7 @@ public class MovimientoJugador : MonoBehaviour
 
 
 
-    
+
     // ANIMACION DAÑO
     void OnCollisionStay2D(Collision2D collision)
     {
@@ -205,29 +216,36 @@ public class MovimientoJugador : MonoBehaviour
 
     void RecibirDano()
     {
+        if (vidas.muerto || vidas.reapareciendo)
+            return;
+
         if (!recibiendoDano)
         {
             recibiendoDano = true;
             estado = 5;
             animator.SetInteger("estado", estado);
+
+            vidas.RecibirDanio(1);
         }
     }
 
     public void TerminarDano()
+{
+    if (vidas.enDano)
     {
-        recibiendoDano = false;
-
-        if (valorMovimiento.x != 0)
-        {
-            estado = 1;
-        }
-        else
-        {
-            estado = 0;
-        }
-
-        animator.SetInteger("estado", estado);
+        vidas.ResolverDanio();
+        return;
     }
+
+    recibiendoDano = false;
+
+    if (valorMovimiento.x != 0)
+        estado = 1;
+    else
+        estado = 0;
+
+    animator.SetInteger("estado", estado);
+}
 
     // SALIR DE LOS OBSTACULOS
     void OnCollisionExit2D(Collision2D collision)
