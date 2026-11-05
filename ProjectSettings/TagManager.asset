@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Obstaculos
   - Suelo
+  - Morir
   layers:
   - Default
   - TransparentFX

@@ -56,12 +56,13 @@ public class VidasPJ : MonoBehaviour
     }
 
     // Evento al final del clip Respawn
-    public void TerminarReaparecer()
-    {
-        rb.simulated = true;
-        reapareciendo = false;
-        GetComponent<MovimientoJugador>().TerminarDano();
-    }
+ public void TerminarReaparecer()
+{
+    rb.simulated = true;
+    reapareciendo = false;
+
+    animator.SetInteger("estado", 0);
+}
 
     // Evento al final del clip Death
     public void FinDelJuego()

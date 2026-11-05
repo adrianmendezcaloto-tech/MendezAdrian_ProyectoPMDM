@@ -228,24 +228,15 @@ public class MovimientoJugador : MonoBehaviour
             vidas.RecibirDanio(1);
         }
     }
-
     public void TerminarDano()
-{
-    if (vidas.enDano)
     {
-        vidas.ResolverDanio();
-        return;
+        recibiendoDano = false;
+
+        if (vidas.enDano)
+        {
+            vidas.ResolverDanio();
+        }
     }
-
-    recibiendoDano = false;
-
-    if (valorMovimiento.x != 0)
-        estado = 1;
-    else
-        estado = 0;
-
-    animator.SetInteger("estado", estado);
-}
 
     // SALIR DE LOS OBSTACULOS
     void OnCollisionExit2D(Collision2D collision)
@@ -264,6 +255,14 @@ public class MovimientoJugador : MonoBehaviour
         }
     }
 
+    //Si se cae el PJ al vacio hace que se muera
+    void OnTriggerEnter2D(Collider2D collision)
+{
+    if (collision.CompareTag("Morir"))
+    {
+        RecibirDano();
+    }
+}
 
 }
 
