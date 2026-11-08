@@ -234,10 +234,8 @@ public class MovimientoJugador : MonoBehaviour
             fuerzaSalto
         );
 
-// Consume los saltos normales para que no pueda saltar otra vez inmediatamente.
         saltosRestantes = 0;
 
-// Selecciona el estado de animacion 4, correspondiente al salto de pared.
         estado = 4;
 // Actualiza el parametro estado del Animator.
         animator.SetInteger("estado", estado);
@@ -284,7 +282,7 @@ public class MovimientoJugador : MonoBehaviour
 // Actualiza la animacion con el estado seleccionado.
         animator.SetInteger("estado", estado);
     }
-    // ==================== ANIMACION DE DANO ====================
+
     // ANIMACION DANO
 
 // Metodo publico que puede llamar un evento de animacion al terminar el clip de dano.
@@ -308,25 +306,24 @@ public class MovimientoJugador : MonoBehaviour
 
 // Actualiza el Animator con el estado normal correspondiente.
         animator.SetInteger("estado", estado);
+
+        vidas.ResolverDanio();
     }
 
 
-// ==================== DETECCION DE PINCHOS ====================
-    // ANIMACION DANO
-// Unity llama a este metodo mientras el collider permanece en contacto con otro collider.
-    void OnCollisionStay2D(Collision2D collision)
+// ANIMACION DANO
+void OnCollisionStay2D(Collision2D collision)
+{
+    if (collision.gameObject.CompareTag("Obstaculos") && !recibiendoDano)
     {
-// Solo actua si el objeto tocado tiene la etiqueta Pinchos y aun no se esta procesando dano.
-        if (collision.gameObject.CompareTag("Pinchos") && !recibiendoDano)
-        {
-// Evita repetir la activacion de dano en cada fotograma de contacto.
-            recibiendoDano = true;
-// Selecciona el estado 5, que representa la animacion de dano.
-            estado = 5;
-// Envia el estado de dano al Animator.
-            animator.SetInteger("estado", estado);
-        }
+        recibiendoDano = true;
+
+        vidas.RecibirDanio(1);
+
+        estado = 5;
+        animator.SetInteger("estado", estado);
     }
+}
 
 
 // Unity llama a este metodo cuando termina el contacto fisico con otro collider.
@@ -335,9 +332,10 @@ public class MovimientoJugador : MonoBehaviour
     void OnCollisionExit2D(Collision2D collision)
     {
 // Comprueba que el objeto del que se separa tiene la etiqueta Pinchos.
-        if (collision.gameObject.CompareTag("Pinchos"))
+        if (collision.gameObject.CompareTag("Obstaculos"))
         {
 // Desactiva la marca de dano al dejar de tocar los pinchos.
             recibiendoDano = false;
         }
     }
+}
